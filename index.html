@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<head>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+
+<body>
+
+  <div class="bottom">
+    <label class="switch">
+      <input type="checkbox", id="nume">
+      <span class="switch-on">annual</span>
+      <span class="switch-off">cumulative</span>
+    </label>
+  </div>
+
+  <div class="bottom">
+    <label class="switch">
+      <input type="checkbox", id="deno">
+      <span class="switch-on">area</span>
+      <span class="switch-off">population</span>
+    </label>
+  </div>
+
+  <div id="world-map"></div>
+
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="http://d3js.org/queue.v1.js"></script>
+  <script src="d3.geo.zoom.js"></script>
+  <script src="d3.tip.v0.6.3.js"></script>
+  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+  <script>
+
+  // variable set up
+  colors = ["#fff5eb","#fee6ce","#fdd0a2","#fdae6b","#fd8d3c","#f16913","#d94801","#a63603","#7f2704"]
+  var width = 1250,
+  height = 750;
+  
+  var time = Date.now();
+  var rotate = [-60,-20];
+  var velocity = [.015, -0];
+
+  var projection = d3.geo.orthographic()
+  .rotate(rotate)
+  .clipAngle(90)
+  .scale(350)
+  .translate([width / 2, height / 2])
+  .precision(.2);
+
+  var path = d3.geo.path()
+  .projection(projection);
+
+  // setup svg
+  var svg = d3.select("#world-map").append("svg")
+  .attr("width", width)
+  .attr("height", height);
+  var g = svg.append("g");
+  var tooltip = d3.select("#world-map").append("div").attr("class", "tooltip hidden");
+
+  // draw grid
+  var graticule = d3.geo.graticule();
+  g.append("path")
+  .datum(graticule)
+  .attr("class", "graticule")
+  .attr("d", path);
+  
+  // optimize waiting time
+  queue()
+  .defer(d3.json, "world-110m2.json")
+  .defer(d3.json, "emission.json")
+  .await(ready);
+
+  // main plotting function
+  function ready(error, topology, raw) {
+    // draw countries
+    var country = g
+    .append("g")
+    .selectAll("path")
+    .data(topojson.feature(topology, topology.objects.countries).features)
+    .enter()
+    .append("path")
+    .attr("d", path)
+    .attr("class", "countries")
+
+    // draw country boundaries
+    g.append("path")
+    .datum(topojson.mesh(topology, topology.objects.countries, function(a, b) { return a !== b; }))
+    .attr("class", "boundaries")
+    .attr("d", path);
+
+    var data = d3.map(raw, function(d) {return d.id});
+
+    var denoNm = 'population',
+    numeNm = 'cumulative';
+
+    update(denoNm, numeNm);
+    //spinning_globe('start');
+
+    function update(denoNm, numeNm, year) {
+    // set up color map and function
+
+    function parseData(denoNm, numeNm, d) {
+      if (numeNm in d) {
+        return $.each(d[numeNm], 
+          function(value, year){
+            return {year: value/d[denoNm]};
+          }) 
+      }
+      else{return null;}
+    };
+
+    data_t = $.map(raw, function(d) { 
+     return {
+      id: d.id,
+      name: d.name,
+      data: parseData(denoNm, numeNm, d)}; 
+    });
+
+    var colormap = d3.scale
+    .quantile()
+    .domain(raw.map(function(d){
+      if (numeNm in d) {
+        return d[numeNm]['2009']/d[denoNm]}
+      }))
+    .range(colors);
+
+    var colorid = function(d) { 
+      try {
+        return colormap(data.get(d.id)[numeNm]['2009']/data.get(d.id)[denoNm]);
+      }
+      catch(err) {return "Gainsboro";} 
+    }
+
+    g.selectAll(".countries")
+    .style('fill', colorid)
+    .on('mousemove', function(d) {
+      d3.select(this).style( "fill", "#666");
+      var mouse = d3.mouse(svg.node()).map(function(d) {
+        return parseInt(d);
+      });
+      tooltip.classed('hidden', false)
+      .attr('style', 'left:' + (mouse[0] + 15) +
+        'px; top:' + (mouse[1] - 35) + 'px')
+      .html(data.get(d.id).name+": "+Math.round(data.get(d.id)[numeNm]['2009']/data.get(d.id)[denoNm]).toLocaleString('en'));
+    })
+    .on('mouseout', function() {
+      d3.select(this).style('fill', colorid);
+      tooltip.classed('hidden', true);
+    });
+  }
+
+  function spinning_globe(trigger){
+   d3.timer(function() {
+    if (trigger=='start'){ 
+      // get current time
+      var dt = Date.now() - time;
+      // get the new position from modified projection function
+      projection.rotate([rotate[0] + velocity[0] * dt, rotate[1] + velocity[1] * dt]);}
+      else{projection.rotate(projection.rotate());}
+    // update cities position = redraw
+    svg.selectAll("path").attr("d", path);
+  });
+ }
+
+// handling swicth
+var denoList = ['population', 'area'],
+ denoSwitch = -0.5; // start with population
+
+ d3.select("#deno").on("change", function(d){
+  denoSwitch = -denoSwitch; 
+  denoNm = denoList[(denoSwitch+0.5)|0];
+  update(denoNm, numeNm);
+});
+
+ var numeList = ['cumulative', 'annual'],
+ numeSwitch = -0.5;
+
+ d3.select("#nume").on("change", function(d){
+  numeSwitch = -numeSwitch; 
+  numeNm = numeList[(numeSwitch+0.5)|0];
+  update(denoNm, numeNm);
+});
+
+}
+
+  // add zoom and pan effect
+  var zoom = d3.geo.zoom()
+  .projection(projection)
+  .on("zoom.redraw", function() {
+    d3.selectAll("path").attr("d", path);
+  });
+
+  g.call(zoom).on("dblclick.zoom", null);
+
+  d3.select(self.frameElement).style("height", height + "px");
+
+  </script>
+</body>
+</html>

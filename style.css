@@ -1,0 +1,87 @@
+html *
+{
+ font-family: Verdana !important;
+}
+
+#world-map {
+  position: absolute;
+  margin: auto;
+  top: 0;
+  right: 70%;
+  bottom: 0;
+  left: 0;
+  width: 1250px;
+  height: 800px;
+  border-radius: 3px;
+}
+
+
+.boundaries {
+  fill: none;
+  stroke: #fff;
+  stroke-linejoin: round;
+  stroke-width: 0.3px;
+}
+
+.graticule {
+  fill: white;
+  stroke: #777;
+  stroke-width: .5px;
+  stroke-opacity: .5;
+}
+
+.hidden {
+  display: none;
+}
+div.tooltip {
+  font-weight: bold;
+  color: #222;
+  background-color: #fff;
+  padding: .5em;
+  text-shadow: #f5f5f5 0 1px 0;
+  border-radius: 2px;
+  opacity: 0.9;
+  position: absolute;
+}
+
+/* The switch - the box around the slider */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 150px;
+  height: 34px;
+  font-size: 22px; 
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Hide default HTML checkbox */
+.switch input {display:none;}
+
+.switch-on {
+  position: absolute;
+  left: 0px;
+  top: 10px;
+  color: #d3d3d3;
+  text-align: left;}
+  .switch-on:hover { color: black !important; }
+  input:checked ~ .switch-on {
+    color:black;
+  }
+
+
+  .switch-off {
+    position: absolute;
+    left: 80px;
+    top: 10px;
+    color: black;
+    text-align: right;
+  }
+  .switch-off:hover { color: black !important; }
+  input:checked ~ .switch-off {
+    color:#d3d3d3;
+  }
+
+
