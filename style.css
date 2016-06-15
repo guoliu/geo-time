@@ -15,6 +15,10 @@ html *
   border-radius: 3px;
 }
 
+.countries {
+  fill: Gainsboro;
+}
+
 
 .boundaries {
   fill: none;

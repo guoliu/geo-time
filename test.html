@@ -6,101 +6,13 @@
 
 <body>
 
-  <div class="bottom">
-    <label class="switch">
-      <input type="checkbox", id="nume">
-      <span class="switch-on">annual</span>
-      <span class="switch-off">cumulative</span>
-    </label>
-  </div>
+  <div id="graph1'"></div>
 
-  <div class="bottom">
-    <label class="switch">
-      <input type="checkbox", id="deno">
-      <span class="switch-on">area</span>
-      <span class="switch-off">population</span>
-    </label>
-  </div>
-
-  <div id="world-map"></div>
-
-  <script src="https://d3js.org/d3.v4.0.0-alpha.49.min.js"></script>
-  <script src="http://d3js.org/topojson.v1.min.js"></script>
+  <script src="http://d3js.org/d3.v3.min.js"></script>
   <script src="http://d3js.org/queue.v1.js"></script>
-  <script src="d3.geo.zoom.js"></script>
-  <script src="d3.tip.v0.6.3.js"></script>
-  <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="plot.js"></script>
+  <script src="http://code.jquery.com/jquery-1.7.2.min.js"></script>
   <script src="line-graph.js"></script>
   <script>
-
-  // variable set up
-  colors =['#313695',
-  '#4575b4',
-  '#74add1',
-  '#abd9e9',
-  '#e0f3f8',
-  '#ffffbf',
-  '#fee090',
-  '#fdae61',
-  '#f46d43',
-  '#d73027',
-  '#a50026']
-
-  var width = 1250,
-  height = 750;
-
-  // handling swicth
-  var denoList = ['population', 'area'],
- denoSwitch = -0.5; // start with population
- var numeList = ['cumulative', 'annual'],
- numeSwitch = -0.5;
-
- var time = Date.now();
- var rotate = [-60,-20];
- var velocity = [.015, -0];
-
- var projection = d3.geo.orthographic()
- .rotate(rotate)
- .clipAngle(90)
- .scale(350)
- .translate([width / 2, height / 2])
- .precision(.2);
-
- var path = d3.geo.path()
- .projection(projection);
-
-  // setup svg
-  var svg = d3.select("#world-map").append("svg")
-  .attr("width", width)
-  .attr("height", height);
-  var g = svg.append("g");
-  var tooltip = d3.select("#world-map").append("div").attr("class", "tooltip hidden");
-
-  // draw grid
-  var graticule = d3.geo.graticule();
-  g.append("path")
-  .datum(graticule)
-  .attr("class", "graticule")
-  .attr("d", path);
-  
-  // optimize waiting time
-  queue()
-  .defer(d3.json, "world-110m2.json")
-  .defer(d3.json, "emission.json")
-  .await(ready);
-
-
-  // add zoom and pan effect
-  var zoom = d3.geo.zoom()
-  .projection(projection)
-  .on("zoom.redraw", function() {
-    d3.selectAll("path").attr("d", path);
-  });
-
-  g.call(zoom).on("dblclick.zoom", null);
-
-  d3.select(self.frameElement).style("height", height + "px");
 
 
     /* 
@@ -126,9 +38,15 @@
      data["colors"] = ["green","orange","red","darkred"];
      data["scale"] = "pow";
 
+     data["values"] = [1,2,3,4];
+     data["start"] = 10000;
+     data["end"] = 13000;
+     data["step"] = 1000;
+     data["names"] = ["test"] 
+
      // create graph now that we've added presentation config
      var l1 = new LineGraph({containerId: 'graph1', data: data});
-     data["values"] = [1,2,3,4];
+
 
      setInterval(function() {
     /*
@@ -151,7 +69,7 @@
     // increment time 1 step
     dataA.start = dataA.start + dataA.step;
     dataA.end = dataA.end + dataA.step; 
-
+    console.log(dataA);
     l1.slideData(dataA);
   }, 2000);
      </script>
