@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+body {
+  font: 10px sans-serif;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+}
+
+.area {
+  fill: lightsteelblue;
+}
+
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.dot {
+  fill: white;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+</style>
+<body>
+  <script src="https://d3js.org/d3.v4.0.0-alpha.49.min.js"></script>
+  <script>
+
+  var data = d3.range(40).map(function(i) {
+    return {year: i+1900, value: (Math.sin(i / 3) + 2) / 4};
+  });
+
+  var margin = {top: 40, right: 40, bottom: 40, left: 40},
+  width = 960 - margin.left - margin.right,
+  height = 500 - margin.top - margin.bottom;
+
+  var x = d3.scaleLinear()
+  .range([0, width])
+  .domain(d3.extent(data, function(d) { return d.year; }));
+
+  var y = d3.scaleLinear()
+  .range([height, 0])
+  .domain([0, d3.max(data, function(d) { return d.value; })]);
+
+  var line = d3.line()
+  .defined(function(d) { return d; })
+  .x(function(d) { return x(d.year); })
+  .y(function(d) { return y(d.value); });
+
+  var area = d3.area()
+  .defined(line.defined())
+  .x(line.x())
+  .y1(line.y())
+  .y0(y(0));
+
+  var svg = d3.select("body").append("svg")
+  .datum(data)
+  .attr("width", width + margin.left + margin.right)
+  .attr("height", height + margin.top + margin.bottom)
+  .append("g")
+  .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+  svg.append("path")
+  .attr("class", "area")
+  .attr("d", area);
+
+  svg.append("g")
+  .attr("id", "x-axis")
+  .attr("transform", "translate(0," + height + ")")
+  .call(d3.axisBottom(x).tickFormat(d3.format("d")));
+
+  for(var b in window) { 
+    console.log(b); 
+  }
+
+
+  </script>

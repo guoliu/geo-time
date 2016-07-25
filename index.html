@@ -5,32 +5,38 @@
 </head>
 
 <body>
+  <div id="map-container">
+    <div id="world-map"></div>
 
-  <div class="bottom">
-    <label class="switch">
-      <input type="checkbox", id="nume">
-      <span class="switch-on">annual</span>
-      <span class="switch-off">cumulative</span>
-    </label>
+    <div id="selector"> 
+      <div class="bottom">
+        <label class="switch">
+          <input type="checkbox", id="nume">
+          <span class="switch-on">annual</span>
+          <span class="switch-off">cumulative</span>
+        </label>
+      </div>
+
+      <div class="bottom">
+        <label class="switch">
+          <input type="checkbox", id="deno">
+          <span class="switch-on">area</span>
+          <span class="switch-off">population</span>
+        </label>
+      </div>
+    </div>
   </div>
 
-  <div class="bottom">
-    <label class="switch">
-      <input type="checkbox", id="deno">
-      <span class="switch-on">area</span>
-      <span class="switch-off">population</span>
-    </label>
-  </div>
+  <div id="time-series"></div>
+  
 
-  <div id="world-map"></div>
-
-  <script src="https://d3js.org/d3.v4.0.0-alpha.49.min.js"></script>
+  <script src="https://d3js.org/d3.v3.min.js"></script>
   <script src="http://d3js.org/topojson.v1.min.js"></script>
   <script src="http://d3js.org/queue.v1.js"></script>
   <script src="d3.geo.zoom.js"></script>
   <script src="d3.tip.v0.6.3.js"></script>
   <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
-  <script src="plot.js"></script>
+  <script src="plot2.js"></script>
   <script src="line-graph.js"></script>
   <script>
 
@@ -47,8 +53,8 @@
   '#d73027',
   '#a50026']
 
-  var width = 1250,
-  height = 750;
+  var width = 800,
+  height = 800;
 
   // handling swicth
   var denoList = ['population', 'area'],
@@ -63,7 +69,7 @@
  var projection = d3.geo.orthographic()
  .rotate(rotate)
  .clipAngle(90)
- .scale(350)
+ .scale(200)
  .translate([width / 2, height / 2])
  .precision(.2);
 
@@ -74,8 +80,8 @@
   var svg = d3.select("#world-map").append("svg")
   .attr("width", width)
   .attr("height", height);
-  var g = svg.append("g");
-  var tooltip = d3.select("#world-map").append("div").attr("class", "tooltip hidden");
+  var g = svg.append("g")
+  .attr("transform", "translate(0,0)");
 
   // draw grid
   var graticule = d3.geo.graticule();
@@ -90,70 +96,21 @@
   .defer(d3.json, "emission.json")
   .await(ready);
 
-
   // add zoom and pan effect
   var zoom = d3.geo.zoom()
   .projection(projection)
   .on("zoom.redraw", function() {
-    d3.selectAll("path").attr("d", path);
-  });
+    //svg.selectAll("path").attr("d", path);
+    g.selectAll("path").attr("transform", "translate(" + d3.event.translate + ")").attr("d", path);
+  })
+  .scaleExtent([d3.min([width, height])/2, d3.min([width, height])/2]);
 
-  g.call(zoom).on("dblclick.zoom", null);
+  g.call(zoom)
+  .on("dblclick.zoom", null)
+  .on("wheel.zoom", null);
 
   d3.select(self.frameElement).style("height", height + "px");
 
-
-    /* 
-     * If running inside bl.ocks.org we want to resize the iframe to fit both graphs
-     */
-     if(parent.document.getElementsByTagName("iframe")[0]) {
-       parent.document.getElementsByTagName("iframe")[0].setAttribute('style', 'height: 650px !important');
-     }
-
-     /*
-     * Note how the 'data' object is added to here before rendering to provide decoration information.
-     * <p>
-     * This is purposefully done here instead of in data.js as an example of how data would come from a server
-     * and then have presentation information injected into it (rather than as separate arguments in another object)
-     * and passed into LineGraph.
-     *
-     * Also, CSS can be used to style colors etc, but this is also doable via the 'data' object so that the styling
-     * of different data points can be done in code which is often more natural for display names, legends, line colors etc
-     */
-     // add presentation logic for 'data' object using optional data arguments
-     var data = {}
-     data["displayNames"] = ["2xx","3xx","4xx","5xx"];
-     data["colors"] = ["green","orange","red","darkred"];
-     data["scale"] = "pow";
-
-     // create graph now that we've added presentation config
-     var l1 = new LineGraph({containerId: 'graph1', data: data});
-     data["values"] = [1,2,3,4];
-
-     setInterval(function() {
-    /*
-    * The following will simulate live updating of the data (see dataA, dataB, dataC etc in data.js which are real examples)
-    * This is being simulated so this example functions standalone without a backend server which generates data such as data.js contains.
-    */
-    // for each data series ...
-    var newData = [];
-    data.values.forEach(function(dataSeries, index) {
-      // take the first value and move it to the end
-      // and capture the value we're moving so we can send it to the graph as an update
-      var v = dataSeries.shift();
-      dataSeries.push(v);
-      // put this value in newData as an array with 1 value
-      newData[index] = [v];
-    })
-    
-    // we will reuse dataA each time
-    dataA.values = newData;
-    // increment time 1 step
-    dataA.start = dataA.start + dataA.step;
-    dataA.end = dataA.end + dataA.step; 
-
-    l1.slideData(dataA);
-  }, 2000);
-     </script>
-   </body>
-   </html>
+  </script>
+</body>
+</html>

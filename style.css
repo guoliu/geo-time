@@ -3,17 +3,58 @@ html *
  font-family: Verdana !important;
 }
 
-#world-map {
-  position: absolute;
-  margin: auto;
-  top: 0;
-  right: 70%;
-  bottom: 0;
-  left: 0;
-  width: 1250px;
-  height: 800px;
-  border-radius: 3px;
+html, body{
+ width:100%;
+ height:100%;
 }
+
+#map-container {
+  margin: 1%;
+  width:100%;
+  height:70%;
+  position: relative;
+}
+
+#world-map {
+  top: 3%;
+  margin: auto;
+  width: 100%;
+  height: 95%;
+  position: relative;
+}
+
+#selector {
+  top: 0%;
+  position:absolute;
+}
+
+#time-series {
+  width: 80%;
+  height: 200px;
+  margin: auto;
+}
+
+#rule { 
+  stroke: gray;  
+  fill: black;
+  stroke-width: 2px;
+  shape-rendering: crispEdges;
+  position:absolute;
+}
+
+.axis path,
+.axis line {
+  fill: none;
+  stroke: black;
+  shape-rendering: crispEdges;
+}
+
+.axis text {
+  font-size: 11px;
+}
+
+
+
 
 .countries {
   fill: Gainsboro;
@@ -37,14 +78,19 @@ html *
 .hidden {
   display: none;
 }
-div.tooltip {
-  font-weight: bold;
+
+div.tooltipMap {
   color: #222;
   background-color: #fff;
   padding: .5em;
-  text-shadow: #f5f5f5 0 1px 0;
   border-radius: 2px;
   opacity: 0.9;
+  position: absolute;
+}
+
+div.tooltipSer {
+  color: gray;
+  background-color: none;
   position: absolute;
 }
 
